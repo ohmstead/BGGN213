@@ -1,0 +1,180 @@
+---
+title: "class 05 - data visualization"
+author: "jack olmstead"
+format: html
+---
+
+# Plotting in R
+
+R has many plotting systems, including 'base' R, which uses built-in functions.
+
+```{r}
+# stopping distance for certain speeds
+head(cars)
+```
+
+```{r}
+plot(cars)
+```
+
+Base R plots are quick and convenient for basic plots. To use a non-base package, I need to first install it using `install.packages("package")` and then load it using `library(package)`
+
+```{r}
+library(ggplot2)
+ggplot(cars) 
+```
+
+All this does is print a blank canvas. ggplot requires more verbosity than `plot`. Every ggplot requires at least 3 things:
+
+-   data (the data.frame with the stuff we want to plot)
+-   **aes**thetics or aes() for short (how the data map to the plot)
+-   **geom**etries or geom() for short (the plot type)
+
+```{r}
+ggplot(cars) +
+  aes(x=speed, y=dist)
+```
+This still doesn't produce the plot we wanted... maybe because we haven't specified a geometry?
+
+```{r}
+ggplot(cars) +
+  aes(x=speed, y=dist) +
+  geom_point() +
+  theme_bw()
+```
+:)
+
+```{r}
+ggplot(cars) +
+  aes(x=speed, y=dist) +
+  geom_point() +
+  geom_line() +
+  theme_bw()
+```
+This doesn't look right... how about adding geom_smooth()?
+
+```{r}
+ggplot(cars) +
+  aes(x=speed, y=dist) +
+  geom_point() +
+  geom_smooth(method='lm', se=FALSE, linewidth=3, alpha=0.1) +
+  theme_bw()
+```
+
+## A plot of some gene expression data
+```{r}
+# read in data
+url <- "https://bioboot.github.io/bimm143_S20/class-material/up_down_expression.txt"
+genes <- read.delim(url)
+head(genes)
+```
+
+> Q. How many genes are in this dataset?
+
+```{r}
+nrow(genes)
+
+sprintf("There are %s genes in this dataset. Produced with sprintf.", nrow(genes))
+```
+
+There are `r nrow(genes)` genes in this dataset. Produced with in-line code.
+
+There are `r ncol(genes)` columns in this dataset.
+
+```{r}
+round (table(genes$State) / nrow(genes) * 100, 2)
+```
+
+### Let's make a plot of this gene-expression data
+```{r}
+ggplot(genes) +
+  aes(x=Condition1, y=Condition2, color=State) +
+  geom_point(alpha=0.4) +
+  theme_bw()
+```
+
+I can save any ggplot in a variable for later use, so I don't have to re-type the whole damn thing.
+```{r gene expression plot}
+p <- ggplot(genes) +
+  aes(x=Condition1, y=Condition2, color=State) +
+  geom_point(shape=21, alpha=0.5) +
+  theme_bw()
+p
+```
+
+```{r}
+p + 
+  scale_color_manual(
+  values=c("blue", "grey", "red")
+) +
+  labs(
+    title='Gene expression changes following drug treatment'
+  )
+```
+
+
+## Faceting with ggplot
+Now we will use the "gapminder" dataset of human life expectancy across the world to test different functions of ggplot.
+
+```{r load in data}
+url <- "https://raw.githubusercontent.com/jennybc/gapminder/master/inst/extdata/gapminder.tsv"
+
+gapminder <- read.delim(url)
+head(gapminder)
+```
+
+> Q. How many countries are in this dataset?
+
+```{r}
+length(unique(gapminder$country)) # get the number of unique countries
+```
+
+> Q. How many timepoints are in this dataset?
+
+```{r}
+length(unique(gapminder$year))
+```
+
+> Q. What country has the smallest population?
+
+```{r}
+gapminder$country[gapminder$pop == min(gapminder$pop)]
+# or
+gapminder$country[which.min(gapminder$pop)]
+```
+
+> Q. What is the smallest population? What year does it occur?
+
+```{r}
+# just get the whole damn thing
+gapminder[which.min(gapminder$pop),]
+```
+
+```{r first gapminder plot}
+g <- ggplot(gapminder) +
+  aes(x=gdpPercap, y=lifeExp, color=continent, size=pop) + 
+  geom_point(alpha=0.4, stroke=0.75) +
+  facet_wrap(~continent)
+```
+
+## gganimate
+```{r}
+library(gganimate)
+```
+
+```{r}
+g + 
+  labs(title="Year: {frame_time}", x="GDP per capita", y="Life expectancy") +
+  transition_time(year) +
+  shadow_wake(wake_length=0.01, alpha=FALSE)
+```
+
+
+
+
+
+
+
+
+
+

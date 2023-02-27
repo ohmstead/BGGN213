@@ -1,0 +1,227 @@
+---
+title: "class 13 - functional annotation"
+author: "jack olmstead"
+format: pdf
+---
+
+# Read in countData and colData
+```{r import}
+countData <- read.csv("GSE37704_featurecounts.csv", row.names = 1)
+colData <- read.csv("GSE37704_metadata.csv", row.names = 1)
+```
+
+Do the row names of meta match the columns of countData?
+```{r assert names}
+all( 
+    rownames(colData) == colnames(countData) 
+    )
+```
+
+> Q. Complete the code to remove the troublesome first column from countData
+
+The numrows and numcols are different between meta and countData. This is because countData's first column is not a sample name, but instead referring to the length of the transcript. Let's remove it.
+```{r match names}
+countData <- countData[-1]
+all( 
+    rownames(colData) == colnames(countData) 
+    )
+```
+
+```{r load libs plots}
+#| message: false
+library(dplyr)
+library(ggplot2)
+```
+
+> Q. Complete the code below to filter countData to exclude genes (i.e. rows) where we have 0 read count across all samples (i.e. columns).
+
+```{r rm zeros}
+clean.counts <- countData %>% filter_all(
+  any_vars(
+    . != 0
+  )
+)
+
+nrow(clean.counts)
+```
+
+# PCA as quality control
+
+```{r PCA}
+pcs <- prcomp(t(clean.counts), scale=T)
+plot(pcs)
+summary(pcs)
+```
+
+> How much variance is captured by the first two PCs?
+
+About `81.8%` variance captured in the first two components. pretty good.
+
+Let's plot samples in PCA space
+```{r PC scatter}
+ggplot(as.data.frame(pcs$x)) +
+  aes(x=PC1, y=PC2, col=colData$condition) +
+  geom_point(size = 5)
+```
+
+# DESeq analysis
+```{r load DESeq2}
+#| message: false
+library(DESeq2)
+```
+
+```{r DESeq2}
+dds <- DESeqDataSetFromMatrix(countData = clean.counts,
+                              colData = colData, 
+                              design = ~condition)
+dds <- DESeq(dds)
+res <- as.data.frame(results(dds))
+
+head(res)
+```
+
+> Q. Call the summary() function on your results to get a sense of how many genes are up or down-regulated at the default 0.1 p-value cutoff.
+
+```{r}
+DESeq2::summary(res)
+```
+
+> Q. Improve this plot by completing the below code, which adds color and axis labels
+
+# Summary volcano plot
+```{r volcano}
+my.colors <- rep("gray", nrow(res))
+my.colors[ res$log2FoldChange > 2 & res$padj < 0.05 ] <- "red"
+my.colors[ res$log2FoldChange < -2 & res$padj < 0.05 ] <- "blue"
+
+ggplot(as.data.frame(res)) +
+  aes(x=log2FoldChange, y=-log10(padj)) +
+  geom_point(color = my.colors, alpha = 0.4) +
+  geom_hline(yintercept = 0.05) +
+  geom_vline(xintercept = c(-2, 2)) +
+  ylim(0, NA) + 
+  labs(ylab = "-log10(Adjusted P-value)",
+       xlab = "log2(Fold Change)"
+       )
+```
+
+# Add annotations
+```{r load anno}
+#| message: false
+library(AnnotationDbi)
+library("org.Hs.eg.db")
+
+columns(org.Hs.eg.db)
+```
+
+> Q. Use the mapIDs() function multiple times to add SYMBOL, ENTREZID and GENENAME annotation to our results by completing the code below.
+
+```{r annotate}
+res$symbol = mapIds(org.Hs.eg.db,
+                    keys=row.names(res), 
+                    keytype="ENSEMBL",
+                    column="SYMBOL",
+                    multiVals="first")
+
+res$entrez = mapIds(org.Hs.eg.db,
+                    keys=row.names(res),
+                    keytype="ENSEMBL",
+                    column="ENTREZID",
+                    multiVals="first")
+
+res$name =   mapIds(org.Hs.eg.db,
+                    keys=row.names(res),
+                    keytype="ENSEMBL",
+                    column="GENENAME",
+                    multiVals="first")
+head(res)
+```
+
+> Q. Finally for this section let's reorder these results by adjusted p-value and save them to a CSV file in your current project directory.
+
+```{r}
+res <- res[order(res$pvalue),]
+write.csv(res, file = "deseq_results.csv")
+```
+
+
+# KEGG, GO
+
+```{r load gage}
+#| message: false
+library(gage)
+library(gageData)
+library(pathview)
+```
+
+I need to create the input for `gage()` - a vector of fold-change values with entrez IDs as the `names()`
+```{r gage input}
+fc <- res$log2FoldChange
+names(fc) <- res$entrez
+```
+
+```{r gage}
+data(kegg.sets.hs)
+
+kegg.res <- gage(fc, gsets=kegg.sets.hs)
+head(kegg.res$less)
+```
+
+```{r pathview KEGG}
+pathview(fc, pathway.id = "hsa04110")
+pathview(fc, pathway.id = "hsa04080")
+```
+![](hsa04110.pathview.png)
+![](hsa04080.pathview.png)
+
+> Q. Can you do the same procedure as above to plot the pathview figures for the top 5 down-reguled pathways?
+
+```{r downregd pathways}
+kegg.res.pathways <- rownames(kegg.res$less)[1:5]
+kegg.res.ids = substr(kegg.res.pathways, start=1, stop=8)
+kegg.res.ids
+
+pathview(gene.data=fc, pathway.id=kegg.res.ids, species="hsa")
+```
+
+![](hsa04110.pathview.png)
+![](hsa03030.pathview.png)
+![](hsa05130.pathview.png)
+![](hsa03013.pathview.png)
+![](hsa03440.pathview.png)
+
+```{r GO}
+data(go.sets.hs)
+data(go.subs.hs)
+
+go.bp.sets = go.sets.hs[go.subs.hs$BP]
+
+go.bp.res = gage(fc, gsets=go.bp.sets, same.dir=TRUE)
+
+head(go.bp.res$less)
+```
+
+> Q. Can you do the same procedure as above to plot the pathview figures for the top 5 down-reguled pathways?
+
+
+
+> Q: What pathway has the most significant “Entities p-value”? Do the most significant pathways listed match your previous KEGG results? What factors could cause differences between the two methods?
+
+
+```{r export sig genes}
+sig_genes <- res[res$padj <= 0.05 & !is.na(res$padj), "symbol"]
+write.table(sig_genes, 
+            file="significant_genes.txt", 
+            row.names=FALSE, 
+            col.names=FALSE, 
+            quote=FALSE
+            )
+```
+
+Exported to Reactome!
+
+![](PathwaysOverview.png)
+
+> Q: What pathway has the most significant “Entities p-value”? Do the most significant pathways listed match your previous KEGG results? What factors could cause differences between the two methods?
+
+Endosomal/Vacuolar pathway. They do roughly match the 2nd hit in the KEGG database: "Lysosome." The reactome database gene lists could be different from the KEGG gene lists, accounting for differences in enrichment of biological processes from both approaches.

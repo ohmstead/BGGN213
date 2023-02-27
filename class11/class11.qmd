@@ -1,0 +1,59 @@
+---
+title: "class 11 - genome informatics"
+author: "jack olmstead"
+format: pdf
+---
+
+```{r}
+asthma <- read.csv("snp.csv")
+length(which(asthma$Genotype..forward.strand. == "G|G")) / nrow(asthma)
+```
+
+```{r}
+# import pop data
+link <- "https://bioboot.github.io/bggn213_W19/class-material/rs8067378_ENSG00000172057.6.txt"
+pop <- read.csv(url(link), sep=" ")
+head(pop)
+unique(pop$geno)
+```
+
+> Q13: Read this file into R and determine the sample size for each genotype and their
+corresponding median expression levels for each of these genotypes.\
+
+```{r}
+#| message: false
+
+library(tidyverse)
+
+ag <- pop %>% filter(geno == "A/G")
+aa <- pop %>% filter(geno=="A/A")
+gg <- pop %>% filter(geno=="G/G")
+```
+
+```{r}
+median(ag$exp)
+median(aa$exp)
+median(gg$exp)
+```
+
+```{r}
+p <- ggplot(pop) +
+  aes(x=geno, y=exp, color=geno) +
+  geom_boxplot() +
+  labs(
+    title="rs8067378 expression effects",
+    xlab="Allele",
+    ylab="ORMDL3 RPKM"
+  )
+
+# p+ geom_density()
+p + geom_point(position="jitter")
+```
+
+
+
+
+
+
+
+

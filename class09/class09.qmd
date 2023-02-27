@@ -1,0 +1,166 @@
+---
+title: "class 09 - structural bioinformatics"
+author: "jack olmstead"
+format: pdf
+---
+## PDB stats
+
+We need to import the data!
+```{r import}
+pdb <- read.csv("PDB.csv")
+
+knitr::kable(pdb)
+```
+
+> Q1: What percentage of structures in the PDB are solved by X-Ray and Electron Microscopy?
+
+The numbers in this csv files are imported as character types. They also have commas in them, so simple coercion isn't possible. Let's write a function to clean these data and sum them.
+```{r char2num.sum()}
+char2num.sum <- function(input.str) {
+  return( sum( as.numeric( gsub(",", "", input.str) ) ) )
+}
+```
+
+```{r Q1}
+sum.xr <- char2num.sum(pdb$X.ray)
+sum.em <- char2num.sum(pdb$EM)
+sum.total <- char2num.sum(pdb$Total)
+
+sum.xr / sum.total * 100
+sum.em /sum.total * 100
+```
+
+
+> Q2: What proportion of structures in the PDB are protein?
+
+```{r Q2}
+prot.types <- grep("protein", pdb$Molecular.Type, ignore.case=T)
+
+sum.prot <- char2num.sum(pdb[prot.types,]$Total)
+
+sum.prot / sum.total * 100
+```
+
+> Q3: Type HIV in the PDB website search box on the home page and determine how many HIV-1 protease structures are in the current PDB?
+
+Searched "HIV" and limited results to Enzyme Classification Name = "Hydrolases". Found 1978 structures.
+
+## Molstar format
+
+Here is an Molstar-captured image showing the stabilizing structural elements of an HIV protease inhibitor.
+
+![Spacefill model of stabilizing H<sub>2</sub>O and aspartate residues from PDB: 1HSG](1HSG.png)
+
+## bio3d
+
+Now we're going to use the `bio3d` package for structual informatics.
+
+```{r}
+library(bio3d)
+
+# let's fuckin get it
+p <- read.pdb("1HSG")
+p
+head(p$atom)
+```
+
+
+> Q7: How many amino acid residues are there in this pdb object? 
+
+```{r}
+max(p$atom$resno)
+```
+
+> Q8: Name one of the two non-protein residues? 
+
+```{r}
+aa321(p$atom$resid[1])
+```
+
+> Q9: How many protein chains are in this structure? 
+
+```{r}
+
+```
+
+## Let's do a Normal Mode Analysis
+```{r}
+# read an input structure
+adk <- read.pdb("6s36")
+m <- nma(adk)
+plot(m)
+```
+
+```{r}
+# make a trajectory file
+mktrj(m, file="adk_m7.pdb")
+```
+
+> Q10. Which of the packages above is found only on BioConductor and not CRAN? 
+
+MSA. 
+
+> Q11. Which of the above packages is not found on BioConductor or CRAN?: 
+
+Grantlab/bio3d-view
+
+> Q12. True or False? Functions from the devtools package can be used to install packages from GitHub and BitBucket? 
+
+T
+
+## PCA of adenylate cyclase
+
+```{r}
+library(BiocManager)
+
+# adk_seq <- get.seq("1AKE_a")
+# adk_seq
+```
+
+> Q13. How many amino acids are in this sequence, i.e. how long is this sequence? 
+
+214
+
+```{r}
+# adk_blasts <- blast.pdb(adk_seq)
+# hits <- get.pdb(adk_blasts)
+
+# get the hits from hard-coded structures
+hits <- NULL
+hits$pdb.id <- c('1AKE_A','6S36_A','6RZE_A','3HPR_A','1E4V_A','5EJE_A','1E4Y_A','3X2S_A','6HAP_A','6HAM_A','4K46_A','3GMT_A','4PZL_A')
+```
+
+
+Now we will download all these structures
+```{r}
+files <- get.pdb(hits$pdb.id, path="pdbs", split=T, gzip=T)
+```
+
+
+```{r}
+pdbs <- pdbaln(files, fit=T, exefile="msa")
+```
+
+
+## Now we will do the PCA
+```{r}
+pdbs.xray <- pca(pdbs)
+plot(pdbs.xray)
+```
+
+These 3 PCs correspond to dimensions in space. Let's use our new PCA axes to make a trajectory between different confirmations!
+```{r}
+mktrj(pdbs.xray, pc=1, file="pc1.pdb")
+```
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,74 @@
+---
+title: "class 06: homework function"
+author: "jack olmstead"
+format: pdf
+---
+
+```{r}
+library(bio3d)
+s1 <- read.pdb("4AKE") # kinase with drug
+s2 <- read.pdb("1AKE") # kinase no drug
+s3 <- read.pdb("1E4Y") # kinase with drug
+s1.chainA <- trim.pdb(s1, chain="A", elety="CA")
+s2.chainA <- trim.pdb(s2, chain="A", elety="CA")
+s3.chainA <- trim.pdb(s1, chain="A", elety="CA")
+s1.b <- s1.chainA$atom$b
+s2.b <- s2.chainA$atom$b
+s3.b <- s3.chainA$atom$b
+plotb3(s1.b, sse=s1.chainA, typ="l", ylab="Bfactor")
+plotb3(s2.b, sse=s2.chainA, typ="l", ylab="Bfactor")
+plotb3(s3.b, sse=s3.chainA, typ="l", ylab="Bfactor")
+```
+
+> Q1. What type of object is returned from the read.pdb() function?
+
+```{r}
+str(s1)
+```
+
+s1 is a "Large pdb" object, which is a list of 8 elements. It is the PDB structure.
+
+> Q2. What does the trim.pdb() function do?
+
+trim.pdb() creates a smaller pdb object from the subset of atoms in a larger pdb object.
+
+> Q3. What input parameter would turn off the marginal black and grey rectangles in the plots and what do they represent in this case?
+
+The second, "sse" parameter turns off the marginal black/grey rectangles. They represent secondary structures that span contiguous residues.
+
+> Q4. What would be a better plot to compare across the different proteins?
+
+To compare B-factor trends, it would be most helpful to have all the lines on one plot
+
+> Q5. Which proteins are more similar to each other in their B-factor trends. How could you quantify this? HINT: try the rbind(), dist() and hclust() functions together with a resulting dendrogram plot. Look up the documentation to see what each of these functions does.
+
+Let's make this into a function!
+
+```{r new function}
+library(bio3d)
+
+#' Title
+#'
+#' @param id The PDB code for the structure of interest.
+#'
+#' @return A plot of B-factor values
+#' @export
+#'
+#' @examples
+plotPdb <- function(id) {
+  
+  # get structure from PDB using identifier
+  struc <- read.pdb(id)
+  
+  # trim and plot structure
+  struc.chainA <- trim.pdb(struc, chain="A", elety="CA")
+  
+  plotb3(struc.chainA$atom$b, sse=struc.chainA, typ="l", ylab="Bfactor")
+}
+```
+
+Try using the function
+
+```{r}
+plotPdb("1AKE")
+```

@@ -1,7 +1,7 @@
 ---
 title: "class 13 - functional annotation"
 author: "jack olmstead"
-format: pdf
+format: gfm
 ---
 
 # Read in countData and colData

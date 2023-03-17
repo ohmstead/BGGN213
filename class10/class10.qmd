@@ -1,7 +1,7 @@
 ---
 title: "class 10 - candy"
 author: "jack olmstead"
-format: pdf
+format: gfm
 ---
 
 ```{r import}

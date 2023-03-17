@@ -1,7 +1,7 @@
 ---
 title: "class06: functions in R"
 author: "jack olmstead"
-format: pdf
+format: gfm
 ---
 
 In this session you will work through the process of developing your own function for calculating average grades for fictional students in a fictional class. The process will involve starting slowly with small defined input vectors (where you know what the answer should be). Then building up to work with more complex input vectors (with multiple missing elements).

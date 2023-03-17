@@ -1,7 +1,7 @@
 ---
 title: "class 08 - unsupervised learning miniproject"
 author: "jack olmstead"
-format: pdf
+format: gfm
 ---
 
 Let's import the data first!

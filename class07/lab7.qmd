@@ -1,7 +1,7 @@
 ---
 title: "class 07 - machine learning 1"
 author: "jack olmstead"
-format: pdf
+format: gfm
 ---
 
 In this class, we will explore different clustering methods and end with PCA!

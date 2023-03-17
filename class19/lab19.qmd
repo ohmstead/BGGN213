@@ -1,7 +1,7 @@
 ---
 title: "Pertussis resurgence mini-project"
 author: "jack olmstead"
-format: pdf
+format: html
 ---
 
 # Web scraping
@@ -103,7 +103,7 @@ table(subject$infancy_vac)
 table(subject$biological_sex)
 ```
 
-> **Q6.** What is the breakdown of race and biological sex (e.g. number of Asian females, White males etc...)
+> **Q6.** What is the breakdown of race and biological sex (e.g. number of Asian females, White males etc...)
 
 ```{r}
 table(subject$biological_sex, subject$race)
@@ -146,7 +146,7 @@ dim(meta)
 head(meta)
 ```
 
-> **Q11.** How many specimens (i.e. entries in `abdata`) do we have for each `isotype`?
+> **Q11.** How many specimens (i.e. entries in `abdata`) do we have for each `isotype`?
 
 ```{r}
 table(abdata$isotype)
@@ -189,7 +189,9 @@ ggplot(ig1) +
 ```
 > Q14. What antigens show differences in the level of IgG1 antibody titers recognizing them over time? Why these and not others?
 
-The biggest responders are FIM2/3 and FHA, for the most part. PRN may have some changes in reponse, but it could also very easily be called noise. 
+The biggest responders are FIM2/3 and FHA, for the most part. PRN may have some changes in reponse, but it could also very easily be classified as noise. 
+
+
 
 ```{r}
 ggplot(ig1) +
@@ -235,14 +237,6 @@ filter(ig1, antigen=="FIM2/3") %>%
   ) +
   labs(title="FIM2/3")
 ```
-
-> Q16. What do you notice about these two antigens time courses and the FIM2/3 data in particular?
-
-Measles seems to have basically no response over visits, whereas the FIM2/3 antigen definitely does. This makes sense, since it's a Pertussis vaccine and not a Measles one!
-
-> Q17. Do you see any clear difference in aP vs. wP responses?
-
-There does seem to be slightly more titer response to the FIM2/3 antigen for aP vaccine vs wP, but it's not suepr dramatic. It definitely doesn't explain the resurgence of Pertussis following introduction of the aP vaccine.
 
 # Obtaining CMI-PB RNASeq data
 ```{r}
@@ -290,7 +284,6 @@ ssrna %>%
     geom_rug() +
   labs(title="RNA-expression at visit 4")
 ```
-
 
 
 

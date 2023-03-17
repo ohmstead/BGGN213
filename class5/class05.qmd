@@ -1,7 +1,7 @@
 ---
 title: "class 05 - data visualization"
 author: "jack olmstead"
-format: html
+format: gfm
 ---
 
 # Plotting in R

@@ -10,23 +10,23 @@ This repo is for my UCSD bioinformatics class, taken in Winter quarter of 2023 a
 
 -   **Lab 5 -** [Data exploration and visualization with R](/class5/class05.md)
 
--   **Lab 6 -** [R functions and R packages from CRAN and BioConductor](/class6/)
+-   **Lab 6 -** [R functions and R packages from CRAN and BioConductor](/class6/class06.md)
 
 *Using R and other tools for Bioinformatics*
 
--   **Lab 6 -** [Introduction to machine learning for Bioinformatics](/class07/)
+-   **Lab 6 -** [Introduction to machine learning for Bioinformatics](/class07/lab7.md)
 
--   **Lab 7 -** [Unsupervised Learning: PCA, k-means, and hierarchical clustering](/class08/)
+-   **Lab 7 -** [Unsupervised Learning: PCA, k-means, and hierarchical clustering](/class08/lab8.md)
 
--   **Lab 8 -** [Structural Bioinformatics (AlphaFold2)](/class09/)
+-   **Lab 8 -** [Structural Bioinformatics (AlphaFold2)](/class09/class09.md)
 
--   **Lab 9 -** [Halloween Candy data science project](/class10/)
+-   **Lab 9 -** [Halloween Candy data science project](/class10/class10.md)
 
--   **Lab 10 -** [Genome informatics](/class11/)
+-   **Lab 10 -** [Genome informatics](/class11/class11.md)
 
--   **Lab 11 -** [Transcriptomics and the analysis of RNA-Seq data](/class12/)
+-   **Lab 11 -** [Transcriptomics and the analysis of RNA-Seq data](/class12/class12.md)
 
--   **Lab 12 -** [RNA-Seq analysis mini-project](/class13/)
+-   **Lab 12 -** [RNA-Seq analysis mini-project](/class13/class13.md)
 
 -   **Lab 13 -** [Hands-on with Git and GitHub]()
 
@@ -36,4 +36,4 @@ This repo is for my UCSD bioinformatics class, taken in Winter quarter of 2023 a
 
 -   **Lab 16 -** [Analyzing sequencing data in the cloud]()
 
--   **Lab 17 -** [Pertussis Resurgence mini-project]()
+-   **Lab 17 -** [Pertussis Resurgence mini-project](/class19/lab19.md)
